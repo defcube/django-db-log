@@ -60,6 +60,7 @@ class Error(Model):
     traceback       = models.TextField(blank=True, null=True)
     datetime        = models.DateTimeField(default=datetime.datetime.now)
     url             = models.URLField(verify_exists=False, null=True, blank=True)
+    referring_url   = models.CharField(max_length=255, blank=True)
     server_name     = models.CharField(max_length=128, db_index=True)
 
     objects         = DBLogManager()
