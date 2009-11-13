@@ -33,47 +33,6 @@ class DBLogTestCase(TestCase):
         settings.DBLOG_DATABASE = None
         settings.DBLOG_WITH_LOGGER = False
 
-    def testLogger(self):
-        from handlers import DBLogHandler
-        
-        Error.objects.all().delete()
-        ErrorBatch.objects.all().delete()
-
-        logging.getLogger().addHandler(DBLogHandler())
-
-        logging.error('This is a test error')
-        cur = (Error.objects.count(), ErrorBatch.objects.count())
-        self.assertEquals(cur, (1, 1), 'Assumed logs failed to save. %s' % (cur,))
-        last = Error.objects.all().order_by('-id')[0:1].get()
-        self.assertEquals(last.logger, 'root')
-        self.assertEquals(last.level, logging.ERROR)
-        self.assertEquals(last.message, 'This is a test error')
-
-        logging.warning('This is a test warning')
-        cur = (Error.objects.count(), ErrorBatch.objects.count())
-        self.assertEquals(cur, (2, 2), 'Assumed logs failed to save. %s' % (cur,))
-        last = Error.objects.all().order_by('-id')[0:1].get()
-        self.assertEquals(last.logger, 'root')
-        self.assertEquals(last.level, logging.WARNING)
-        self.assertEquals(last.message, 'This is a test warning')
-        
-        logging.error('This is a test error')
-        cur = (Error.objects.count(), ErrorBatch.objects.count())
-        self.assertEquals(cur, (3, 2), 'Assumed logs failed to save. %s' % (cur,))
-        last = Error.objects.all().order_by('-id')[0:1].get()
-        self.assertEquals(last.logger, 'root')
-        self.assertEquals(last.level, logging.ERROR)
-        self.assertEquals(last.message, 'This is a test error')
-    
-        logger = logging.getLogger('test')
-        logger.info('This is a test info')
-        cur = (Error.objects.count(), ErrorBatch.objects.count())
-        self.assertEquals(cur, (4, 3), 'Assumed logs failed to save. %s' % (cur,))
-        last = Error.objects.all().order_by('-id')[0:1].get()
-        self.assertEquals(last.logger, 'test')
-        self.assertEquals(last.level, logging.INFO)
-        self.assertEquals(last.message, 'This is a test info')
-    
     def testMiddleware(self):
         Error.objects.all().delete()
         ErrorBatch.objects.all().delete()
@@ -124,32 +83,4 @@ class DBLogTestCase(TestCase):
         self.assertEquals(last.message, 'This is an error')
         
         
-    def testAlternateDatabase(self):
-        settings.DBLOG_DATABASE = dict(
-            DATABASE_HOST=settings.DATABASE_HOST,
-            DATABASE_PORT=settings.DATABASE_PORT,
-            DATABASE_NAME=settings.DATABASE_NAME,
-            DATABASE_USER=settings.DATABASE_USER,
-            DATABASE_PASSWORD=settings.DATABASE_PASSWORD,
-            DATABASE_OPTIONS=settings.DATABASE_OPTIONS,
-        )
-        
-        Error.objects.all().delete()
-        ErrorBatch.objects.all().delete()
-
-        try:
-            Error.objects.get(id=999999979)
-        except Error.DoesNotExist, exc:
-            Error.objects.create_from_exception(exc)
-        else:
-            self.fail('Unable to create `Error` entry.')
-            
-        cur = (Error.objects.count(), ErrorBatch.objects.count())
-        self.assertEquals(cur, (1, 1), 'Assumed logs failed to save. %s' % (cur,))
-        last = Error.objects.all().order_by('-id')[0:1].get()
-        self.assertEquals(last.logger, 'root')
-        self.assertEquals(last.class_name, 'DoesNotExist')
-        self.assertEquals(last.level, logging.FATAL)
-        self.assertEquals(last.message, smart_unicode(exc))
-
         settings.DBLOG_DATABASE = None
