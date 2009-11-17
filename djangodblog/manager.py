@@ -41,8 +41,6 @@ django_is_10 = django.VERSION < (1, 1)
 Note: You will need to create the tables by hand if you use this option.
 """
 
-assert(not getattr(settings, 'DBLOG_DATABASE', None) or django.VERSION < (1, 2), 'The `DBLOG_DATABASE` setting requires Django < 1.2')
-
 _connection = None
 def close_connection(**kwargs):
     global _connection
