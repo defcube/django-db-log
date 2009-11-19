@@ -1,5 +1,4 @@
 # Multi-db support based on http://www.eflorenzano.com/blog/post/easy-multi-database-support-django/
-# TODO: is there a way to use the traceback module based on an exception variable?
 
 from django.conf import settings
 from django.core import signals
